@@ -17,6 +17,81 @@
  */
 package io.github.bonigarcia.selenium.bludit;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Duration;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 class BluditFeature01Test {
 
+    WebDriver driver;
+
+    @BeforeEach
+    void setup() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-search-engine-choice-screen");
+        driver = new ChromeDriver(options);
+    }
+
+    @AfterEach
+    void teardown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    void testAddNewContent() {
+        driver.get("http://localhost:8080/admin");
+
+        // Enter "admin" in the Username field
+        driver.findElement(By.name("username")).sendKeys("admin");
+
+        // Enter "password" in the Password field
+        driver.findElement(By.name("password")).sendKeys("password");
+
+        // Click the "Login" button
+        driver.findElement(By.xpath("//*[contains(text(), 'Login')]")).click();
+
+        // Click the "New content" link
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement newContentLink = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("New content")));
+        newContentLink.click();
+
+        // Enter "Test Content" in the "Title" field
+        WebElement titleField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("title")));
+        titleField.sendKeys("Test Content");
+
+        // Click the "Save" button
+        WebElement saveButton = wait
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(text(), 'Save')]")));
+        saveButton.click();
+
+        // Verify "Test Content" is shown as first content in the "Published" section of
+        // the "Manage content" page
+
+        // Locate the next row of a cell containing "PUBLISHED" text with Selenium
+        WebElement firstContent = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//table/tbody/tr[td[contains(text(), 'Published')]]/following-sibling::tr[1]/td[1]")));
+        assertTrue(firstContent.getText().equals("Test Content"),
+                "'Test Content' is not displayed as the first content in the 'Published' section");
+
+        // Wait for the success notification to disappear
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("notification-success")));
+
+        // Click the "Log out" link
+        WebElement logoutLink = wait
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(text(), 'Log out')]")));
+        logoutLink.click();
+    }
 }
