@@ -16,6 +16,93 @@
  */
 package io.github.bonigarcia.selenium.claroline;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.Duration;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 class ClarolineFeature05Test {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    @BeforeEach
+    void setup() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-search-engine-choice-screen");
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    public void testSearchCourse() {
+        // Given the user is on the home page (/claroline11110/index.php)
+        driver.get("http://localhost:3000/claroline11110/index.php");
+
+        // When the user enters "admin" in the "Username" field
+        WebElement usernameField = wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.name("login")));
+        usernameField.sendKeys("admin");
+
+        // And enters "admin" in the "Password" field
+        WebElement passwordField = driver.findElement(By.name("password"));
+        passwordField.sendKeys("admin");
+
+        // And clicks the "Enter" button
+        WebElement enterButton = driver
+                .findElement(By.xpath("//button[@type='submit']"));
+        enterButton.click();
+
+        // And clicks the "Platform administration" link
+        WebElement platformAdminLink = wait
+                .until(ExpectedConditions.visibilityOfElementLocated(
+                        By.linkText("Platform administration")));
+        platformAdminLink.click();
+
+        // And enters "Course001" in the "Search for a course" field
+        WebElement searchCourseField = wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.id("search_course")));
+        searchCourseField.sendKeys("Course001");
+
+        // And clicks the "Go" button on the right of the "Search for a course"
+        // field
+        WebElement goButton = driver
+                .findElements(By.xpath("//input[@value='Go']")).get(1);
+        goButton.click();
+
+        // Then "Course001" is shown in the "Course title" column of the first
+        // row of the table
+        WebElement courseTitleColumn = wait
+                .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+                        "//table[@class='claroTable emphaseLine']/tbody/tr[1]/td[2]")));
+        assertEquals("Course001", courseTitleColumn.getText());
+
+        // And "001" is shown in the "Code" column of the first row of the table
+        WebElement codeColumn = driver.findElement(By.xpath(
+                "//table[@class='claroTable emphaseLine']/tbody/tr[1]/td[1]"));
+        assertEquals("001", codeColumn.getText());
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Logout" link
+        WebElement logoutLink = driver.findElement(By.linkText("Logout"));
+        logoutLink.click();
+    }
 
 }
