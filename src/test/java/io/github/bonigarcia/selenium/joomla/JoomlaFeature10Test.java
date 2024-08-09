@@ -16,6 +16,57 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature10Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature10Test extends JoomlaParent {
+
+    // Feature: Content management
+    // Scenario: Edits an article
+    @Test
+    void testEditArticle() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "administrator" in the "Username" field
+        typeTextInField(By.id("username"), "administrator");
+
+        // And enters "root" in the "Password" field
+        typeTextInField(By.id("password"), "root");
+
+        // And clicks the "Sign in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // And clicks the gear icon to the bottom right of "Test Article 01"
+        click(By.linkText("Test Article 01"));
+        click(By.xpath("//*[contains(@class, 'icon-cog')]"));
+
+        // And clicks the "Edit" option
+        // #the new text must be appended to the existing one
+        click(By.xpath("//*[contains(@class, 'edit-icon')]"));
+
+        // And enters "EDITED" in the main text editor
+        click(By.cssSelector("a[title='Toggle editor']"));
+        typeTextInField(By.id("jform_articletext"), "EDITED");
+
+        // And clicks the "Save" button
+        click(By.xpath("//*[contains(@class, 'btn btn-primary')]"));
+
+        // Then "This is the body of the first article for testing the
+        // platformEDITED" is shown as text of the first article
+        assertText(By.xpath("//*[contains(@class, 'article-info')]"),
+                "This is the body of the first article for testing the platformEDITED");
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And clicks the "Log out" button
+        clickLogoutButton();
+
+    }
 
 }

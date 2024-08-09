@@ -16,6 +16,28 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature03Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature03Test extends JoomlaParent {
+
+    // Feature: Login
+    // Scenario: Tries to login with empty credentials and fails
+    @Test
+    void testEmptyLogin() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And clicks the "Log in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // Then "Please fill out this field." is shown as a HTML 5 validation
+        // message
+        assertValidationMessage(By.id("username"),
+                "Please fill out this field.");
+    }
 
 }

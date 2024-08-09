@@ -16,6 +16,49 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature15Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature15Test extends JoomlaParent {
+
+    // Feature: User management
+    // Scenario: Changes the password of a user
+    @Test
+    void testChangePassword() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "tuser01" in the "Username" field
+        typeTextInField(By.id("username"), "tuser01");
+
+        // And enters "tpassword" in the "Password" field
+        typeTextInField(By.id("password"), "tpassword");
+
+        // And clicks the "Sign in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // And enters "newpassword01" in the "Password (optional)" field
+        String passwd = "newpassword01";
+        typeTextInField(By.id("jform_password1"), passwd);
+
+        // And enters "newpassword01" in the "Confirm Password (optional)" field
+        typeTextInField(By.id("jform_password2"), passwd);
+
+        // And clicks the "Submit" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // Then "Profile saved." is shown on a green box
+        assertText(By.className("alert-message"), "Profile saved.");
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And clicks the "Log out" button
+        clickLogoutButton();
+    }
 
 }

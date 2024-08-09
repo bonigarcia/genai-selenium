@@ -16,6 +16,59 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature08Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature08Test extends JoomlaParent {
+
+    // Feature: Content management
+    // Scenario: Adds a new article
+    @Test
+    void testAddNewArticle() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "administrator" in the "Username" field
+        typeTextInField(By.id("username"), "administrator");
+
+        // And enters "root" in the "Password" field
+        typeTextInField(By.id("password"), "root");
+
+        // And clicks the "Sign in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // And clicks the "Create a Post" link
+        clickCreateAPostLink();
+
+        // And enters "Test Article 01" in the "Title" field
+        String title = "Test Article 01";
+        typeTextInField(By.id("jform_title"), title);
+
+        // And enters "This is the body of the first article for testing the
+        // platform" in the main text editor
+        click(By.cssSelector("a[title='Toggle editor']"));
+        String text = "This is the body of the first article for testing the platform";
+        typeTextInField(By.id("jform_articletext"), text);
+
+        // And clicks the "Save" button
+        click(By.xpath("//*[contains(@class, 'btn btn-primary')]"));
+
+        // Then "Test Article 01" is shown as title of the first article
+        assertText(By.xpath("//*[contains(@class, 'page-header')]"), title);
+
+        // And "This is the body of the first article for testing the platform"
+        // is shown as text of the first article
+        assertText(By.xpath("//*[contains(@class, 'article-info')]"), text);
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And clicks the "Log out" button
+        clickLogoutButton();
+    }
 
 }

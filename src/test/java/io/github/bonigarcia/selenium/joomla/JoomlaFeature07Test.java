@@ -16,6 +16,52 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature07Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature07Test extends JoomlaParent {
+
+    // Feature: Site administration login
+    // Scenario: Tries to login to the site administration area with wrong
+    // credentials and fails
+    @Test
+    void testEmptySiteAdminLogin() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "administrator" in the "Username" field
+        typeTextInField(By.id("username"), "administrator");
+
+        // And enters "root" in the "Password" field
+        typeTextInField(By.id("password"), "root");
+
+        // And clicks the "Sign in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // And clicks the "Site Administrator" link
+        // #a new tab opens
+        clickSiteAdministrator();
+        switchToNewTab();
+
+        // And clicks the "Log in" button
+        click(By.xpath("//*[contains(@class, 'login-button')]"));
+
+        // Then "Empty password not allowed." is shown in a yellow box
+        assertText(By.className("alert-message"),
+                "Empty password not allowed.");
+
+        // Given the previous assertion passed
+        // Then the user closes the current tab
+        closeCurrentTab();
+
+        // And clicks the "Log out" link
+        clickAuthorLogoutLink();
+
+        // And clicks the "Log out" button
+        clickLogoutButton();
+    }
 
 }

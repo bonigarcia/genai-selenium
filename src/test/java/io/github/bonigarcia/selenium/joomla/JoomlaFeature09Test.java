@@ -16,6 +16,47 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature09Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature09Test extends JoomlaParent {
+
+    // Feature: Content management
+    // Scenario: Tries to add an empty article and fails
+    @Test
+    void testAddEmptyArticle() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "administrator" in the "Username" field
+        typeTextInField(By.id("username"), "administrator");
+
+        // And enters "root" in the "Password" field
+        typeTextInField(By.id("password"), "root");
+
+        // And clicks the "Sign in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // And clicks the "Create a Post" link
+        clickCreateAPostLink();
+
+        // And clicks the "Save" button
+        click(By.xpath("//*[contains(@class, 'btn btn-primary')]"));
+
+        // Then "Invalid field: Title" is shown in a red box
+        assertText(
+                By.xpath("//*[contains(@class, 'alert-error alert-danger')]"),
+                "Invalid field: Title");
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And clicks the "Log out" button
+        clickLogoutButton();
+    }
 
 }

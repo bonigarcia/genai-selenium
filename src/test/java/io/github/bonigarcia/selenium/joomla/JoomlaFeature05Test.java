@@ -16,6 +16,39 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature05Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature05Test extends JoomlaParent {
+
+    // Feature: Site administration login
+    // Scenario: Login as the newly added user
+    @Test
+    void testLoginAsNewUser() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "tuser01" in the "Username" field
+        typeTextInField(By.id("username"), "tuser01");
+
+        // And enters "tpassword" in the "Password" field
+        typeTextInField(By.id("password"), "tpassword");
+
+        // And clicks the "Sign in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // Then "Test User" is shown as value of the "Name" field
+        assertValue(By.id("jform_name"), "Test User");
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And clicks the "Log out" button
+        clickLogoutButton();
+    }
 
 }

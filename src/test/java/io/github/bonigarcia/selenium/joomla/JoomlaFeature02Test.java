@@ -16,6 +16,34 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature02Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature02Test extends JoomlaParent {
+
+    // Feature: Login
+    // Scenario: Tries to login with wrong credentials and fails
+    @Test
+    void testBadLogin() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "administrator" in the "Username" field
+        typeTextInField(By.id("username"), "administrator");
+
+        // And enters "wrongpassword" in the "Password" field
+        typeTextInField(By.id("password"), "wrongpassword");
+
+        // And clicks the "Log in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // Then "Username and password do not match or you do not have an
+        // account yet." is shown in a yellow box
+        assertText(By.className("alert-message"),
+                "Username and password do not match or you do not have an account yet.");
+    }
 
 }

@@ -16,6 +16,94 @@
  */
 package io.github.bonigarcia.selenium.joomla;
 
-class JoomlaFeature19Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class JoomlaFeature19Test extends JoomlaParent {
+
+    // Feature: Site menus management
+    // Scenario: Tries to add a menu item without selecting a menu and fails
+    @Test
+    void testAddMenuItem_MenuNotSelected() {
+        // Given the user is on the home page
+        navigateHomePage();
+
+        // When the user clicks the "Author Login" link
+        clickAuthorLoginLink();
+
+        // And enters "administrator" in the "Username" field
+        typeTextInField(By.id("username"), "administrator");
+
+        // And enters "root" in the "Password" field
+        typeTextInField(By.id("password"), "root");
+
+        // And clicks the "Sign in" button
+        click(By.xpath("//button[@type='submit']"));
+
+        // And clicks the "Site Administrator" link
+        // #a new tab opens
+        clickSiteAdministrator();
+        switchToNewTab();
+
+        // And enters "administrator" in the "Username" field
+        typeTextInField(By.id("mod-login-username"), "administrator");
+
+        // And enters "root" in the "Password" field
+        typeTextInField(By.id("mod-login-password"), "root");
+
+        // And clicks the "Log in" button
+        click(By.xpath("//*[contains(@class, 'login-button')]"));
+
+        // And clicks the "Menu(s)" link
+        click(By.xpath("//span[normalize-space()='Menu(s)']"));
+
+        // And clicks the "Menu Items" link
+        click(By.linkText("Menu Items"));
+
+        // And clicks the "New" button
+        click(By.cssSelector(".btn.btn-small.button-new.btn-success"));
+
+        // And enters "Test menu item" in the "Menu Title" field
+        String title = "Test menu item";
+        typeTextInField(By.id("jform_title"), title);
+
+        // And clicks the "Select" button
+        // #an iframe opens
+        click(By.xpath("//button[@title='Select']"));
+        waitForIframe("Menu Item Type");
+
+        // And clicks the "Articles" link
+        click(By.linkText("Articles"));
+
+        // And clicks the "Archived Articles" link
+        // #the iframe closes
+        click(By.partialLinkText("Archived Articles"));
+        closedIFrame();
+
+        // And clicks the "Save & Close" button
+        click(By.xpath("//*[contains(@class, 'button-save')]"));
+
+        // Then "Invalid field: Menu" is shown on a red box
+        checkTextOnPage("Invalid field:");
+        checkTextOnPage("Menu");
+        click(By.id("toolbar-cancel"));
+
+        // Given the previous assertion passed
+        // Then the user clicks the down pointing arrow icon in the top-right
+        // corner of the page
+        clickPointingArrow();
+
+        // And clicks the "Log out" button
+        click(By.linkText("Logout"));
+
+        // And closes the current tab
+        closeCurrentTab();
+
+        // And clicks the "Log out" link
+        click(By.linkText("Log out"));
+
+        // And clicks the "Log out" button
+        clickLogoutButton();
+    }
 
 }
