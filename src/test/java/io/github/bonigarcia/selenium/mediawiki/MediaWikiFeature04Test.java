@@ -16,6 +16,154 @@
  */
 package io.github.bonigarcia.selenium.mediawiki;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 class MediaWikiFeature04Test {
+
+    WebDriver driver;
+    WebDriverWait wait;
+
+    @BeforeEach
+    public void setUp() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-search-engine-choice-screen");
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    public void testCreateNewPage() {
+        // Given the user is on the home page
+        driver.get("http://localhost:8080/");
+
+        // When the user clicks the "Log in" link
+        WebElement loginLink = driver.findElement(By.linkText("Log in"));
+        loginLink.click();
+
+        // And enters "admin" in the "Username" field
+        WebElement usernameField = driver.findElement(By.name("wpName"));
+        usernameField.sendKeys("admin");
+
+        // And enters "Password001" in the "Password" field
+        WebElement passwordField = driver.findElement(By.name("wpPassword"));
+        passwordField.sendKeys("Password001");
+
+        // And clicks the "Log in" button
+        WebElement loginButton = driver.findElement(By.name("wploginattempt"));
+        loginButton.click();
+
+        // And enters "E2E Web Testing" in the search bar
+        WebElement searchBar = driver.findElement(By.name("search"));
+        searchBar.sendKeys("E2E Web Testing");
+
+        // And presses Enter
+        searchBar.sendKeys(Keys.RETURN);
+
+        // And clicks the "E2E Web Testing" link
+        WebElement softwareTestingLink = driver
+                .findElement(By.linkText("E2E Web Testing"));
+        softwareTestingLink.click();
+
+        // And closes the notification
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
+                By.className("oo-ui-popupWidget-popup")));
+        List<WebElement> closeNotificationButtons = driver
+                .findElements(By.xpath("//a[@title='Close']"));
+        closeNotificationButtons.get(closeNotificationButtons.size() - 1)
+                .click();
+
+        // And enters the text of the page in the editor
+        WebElement editorField = wait
+                .until(ExpectedConditions.visibilityOfElementLocated(By
+                        .xpath("//*[contains(@class, 've-ce-documentNode')]")));
+        String pageText = "[[";
+        editorField.sendKeys(pageText);
+
+        // And enters "Software testing" in the popup search bar
+        WebElement popupSearchBar = wait.until(ExpectedConditions
+                .elementToBeClickable(By.xpath("//input[@type='search']")));
+        popupSearchBar.sendKeys("Software testing");
+
+        // And clicks the "Software testing" link
+        WebElement swLink = wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.linkText("Software testing")));
+        swLink.click();
+
+        // And clicks the editor after the "Software testing" link
+        editorField.click();
+
+        // And enters the last part of the text
+        // FIXME: What is that?
+
+        // And clicks the "Save" button
+        // FIXME: "Save page"
+        driver.findElement(
+                By.xpath("//*[contains(@class, 've-ui-toolbar-saveButton')]"))
+                .click();
+
+        // And enters "Page created" in the summary
+        WebElement summaryField = wait.until(ExpectedConditions
+                .elementToBeClickable((By.tagName("textarea"))));
+        summaryField.sendKeys("Page created");
+
+        // And clicks the "Save page" button
+        WebElement savePageButton = wait
+                .until(ExpectedConditions.elementToBeClickable((By.xpath(
+                        "//span[normalize-space(text())='Save page']"))));
+        savePageButton.click();
+
+        // FIXME: Test must wait until the page is created. Otherwise, the logic
+        // is flaky
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By
+                .xpath("//*[contains(text(),'The page has been created.')]")));
+
+        // Then the page is displayed with "E2E Web Testing" as title and the
+        // previously inserted text as body
+        WebElement pageTitle = driver.findElement(By.id("firstHeading"));
+        assertEquals("E2E Web Testing", pageTitle.getText());
+
+        // Given the previous assertion passed
+        // When the user clicks the "Software testing"
+        driver.findElement(By.linkText("Software testing")).click();
+
+        // Then the page created in the previous test case is displayed
+        pageTitle = driver.findElement(By.id("firstHeading"));
+        assertEquals("Software testing", pageTitle.getText());
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Log out" link
+        WebElement logoutLink = wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.linkText("Log out")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();",
+                logoutLink);
+
+        // Verify the user is logged out by checking the presence of the "Log
+        // in" link
+        wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.linkText("Log in")));
+    }
 
 }

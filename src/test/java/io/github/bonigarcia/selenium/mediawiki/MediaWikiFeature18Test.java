@@ -16,6 +16,115 @@
  */
 package io.github.bonigarcia.selenium.mediawiki;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Duration;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 class MediaWikiFeature18Test {
 
+    WebDriver driver;
+    WebDriverWait wait;
+
+    @BeforeEach
+    public void setUp() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-search-engine-choice-screen");
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    public void testBlockUser() {
+        // Given the user is on the home page
+        driver.get("http://localhost:8080/");
+
+        // When the user clicks the "Log in" link
+        WebElement loginLink = driver.findElement(By.linkText("Log in"));
+        loginLink.click();
+
+        // And enters "admin" in the "Username" field
+        WebElement usernameField = driver.findElement(By.name("wpName"));
+        usernameField.sendKeys("admin");
+
+        // And enters "Password001" in the "Password" field
+        WebElement passwordField = driver.findElement(By.name("wpPassword"));
+        passwordField.sendKeys("Password001");
+
+        // And clicks the "Log in" button
+        WebElement loginButton = driver.findElement(By.name("wploginattempt"));
+        loginButton.click();
+
+        // And clicks the "Special pages" link
+        WebElement specialPagesLink = driver
+                .findElement(By.linkText("Special pages"));
+        specialPagesLink.click();
+
+        // And clicks the "Block user" link
+        WebElement blockUserLink = driver
+                .findElement(By.linkText("Block user"));
+        blockUserLink.click();
+
+        // And enters "User001" in the "Username, IP address, or IP range" field
+        WebElement userField = driver.findElement(By.name("wpTarget"));
+        userField.sendKeys("User001");
+
+        // And deselects the checkbox "Automatically block the last IP address
+        // used by this user [...]"
+        WebElement autoBlockCheckbox = driver
+                .findElement(By.name("wpAutoBlock"));
+
+        if (autoBlockCheckbox.isSelected()) {
+            autoBlockCheckbox.click();
+        }
+
+        // And selects "indefinite" in the "Expiration" dropdown select
+        driver.findElement(By.xpath(
+                "//div[@class=\"mw-htmlform-select-or-other oo-ui-widget oo-ui-widget-enabled mw-widget-selectWithInputWidget mw-widget-ExpiryWidget-relative\"]//span[@class=\"oo-ui-indicatorElement-indicator oo-ui-indicator-down\"]"))
+                .click();
+        wait.until(ExpectedConditions.elementToBeClickable(
+                (By.xpath("//span[normalize-space(text())='indefinite']"))))
+                .click();
+
+        // And clicks the "Block this user" button
+        WebElement blockUserButton = driver
+                .findElement(By.xpath("//button[@value='Block this user']"));
+        blockUserButton.click();
+
+        // Then "User001 has been blocked" is displayed
+        WebElement confirmationMessage = driver
+                .findElement(By.id("mw-content-text"));
+        assertTrue(confirmationMessage.getText()
+                .contains("User001 has been blocked"));
+
+        // Given the previous assertion passed
+        // Then the user clicks the "Log out" link
+        WebElement logoutLink = wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.linkText("Log out")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();",
+                logoutLink);
+
+        // Verify the user is logged out by checking the presence of the "Log
+        // in" link
+        wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.linkText("Log in")));
+    }
 }
