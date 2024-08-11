@@ -16,6 +16,55 @@
  */
 package io.github.bonigarcia.selenium.prestashop;
 
-class PrestaShopFeature01Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class PrestaShopFeature01Test extends PrestaShopParent {
+
+    // Feature: Catalog management
+    // Scenario: Adds a new product
+    @Test
+    void testAddNewProduct() {
+        // Given the user is on the login page of the administration panel
+        // (/administrator)
+        navigateAdminPage();
+
+        // When the user enters "admin@prestashop.com" in the "Email address"
+        // field
+        typeTextInField(By.id("email"), "admin@prestashop.com");
+
+        // And enters "password" in the "Password" field
+        typeTextInField(By.id("passwd"), "password");
+
+        // And clicks the "Login" button
+        clickSubmit();
+
+        // And hovers on "Catalog"
+        hover(By.id("maintab-AdminCatalog"));
+
+        // And clicks on "Products"
+        click(By.linkText("Products"));
+
+        // And clicks the "Add new product" button
+        click(By.linkText("Add new product"));
+
+        // And enters "Blue Jacket3" in the "Name" field
+        String name = "Blue Jacket3";
+        typeTextInField(By.id("name_1"), name);
+
+        // And clicks the "Save" button
+        click(By.name("submitAddproduct"));
+
+        // Then "Successful creation" is shown on a green box
+        assertText(By.className("alert-success"), "Successful creation");
+
+        // Given the previous assertion passed
+        // Then the user clicks on the user icon in the top right corner of the
+        // page
+        click(By.id("employee_infos"));
+
+        // And clicks the "Sign out" link
+        click(By.linkText("Sign out"));
+    }
 
 }

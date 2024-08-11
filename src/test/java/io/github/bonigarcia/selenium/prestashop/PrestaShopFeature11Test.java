@@ -16,6 +16,57 @@
  */
 package io.github.bonigarcia.selenium.prestashop;
 
-class PrestaShopFeature11Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class PrestaShopFeature11Test extends PrestaShopParent {
+
+    // Feature: Catalog management
+    // Scenario: Tries to add an empty product attribute and fails
+    @Test
+    void testAddEmptyAttribute() {
+        // Given the user is on the login page of the administration panel
+        // (/administrator)
+        navigateAdminPage();
+
+        // When the user enters "admin@prestashop.com" in the "Email address"
+        // field
+        typeTextInField(By.id("email"), "admin@prestashop.com");
+
+        // And enters "password" in the "Password" field
+        typeTextInField(By.id("passwd"), "password");
+
+        // And clicks the "Login" button
+        clickSubmit();
+
+        // And hovers on "Catalog"
+        hover(By.id("maintab-AdminCatalog"));
+
+        // And clicks on "Product Attributes"
+        click(By.linkText("Product Attributes"));
+
+        // And clicks the "Add new attribute" button
+        click(By.xpath("//a[@title='Add new attribute']"));
+
+        // And clicks the "Save" button
+        click(By.id("attribute_group_form_submit_btn"));
+        // attribute_group_form_submit_btn
+
+        // Then an error message is shown on a red box
+        // Then "2 errors This link_rewrite field is required at least in
+        // English (English) This name field is required at least in English
+        // (English)" is shown on a red box
+        assertText(By.className("alert-danger"),
+                "2 errors This link_rewrite field is required at least in English (English) "
+                        + "This name field is required at least in English (English)");
+
+        // Given the previous assertion passed
+        // Then the user clicks on the user icon in the top right corner of the
+        // page
+        click(By.id("employee_infos"));
+
+        // And clicks the "Sign out" link
+        click(By.linkText("Sign out"));
+    }
 
 }

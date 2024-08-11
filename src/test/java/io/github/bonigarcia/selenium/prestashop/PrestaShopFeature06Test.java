@@ -16,6 +16,58 @@
  */
 package io.github.bonigarcia.selenium.prestashop;
 
-class PrestaShopFeature06Test {
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+
+class PrestaShopFeature06Test extends PrestaShopParent {
+
+    // Feature: Catalog management
+    // Scenario: Checks that taxes are computed correctly when adding a new
+    // product
+    @Test
+    void testAddNewProductWithTax() {
+        // Given the user is on the login page of the administration panel
+        // (/administrator)
+        navigateAdminPage();
+
+        // When the user enters "admin@prestashop.com" in the "Email address"
+        // field
+        typeTextInField(By.id("email"), "admin@prestashop.com");
+
+        // And enters "password" in the "Password" field
+        typeTextInField(By.id("passwd"), "password");
+
+        // And clicks the "Login" button
+        clickSubmit();
+
+        // And hovers on "Catalog"
+        hover(By.id("maintab-AdminCatalog"));
+
+        // And clicks on "Products"
+        click(By.linkText("Products"));
+
+        // And clicks the "Add new product" button
+        click(By.linkText("Add new product"));
+
+        // And clicks the "Prices" link
+        click(By.linkText("Prices"));
+
+        // And enters "10" in the "Pre-tax retail price" field
+        By priceTE = By.id("priceTE");
+        clearField(priceTE);
+        typeTextInField(priceTE, "10");
+
+        // Then "12.20" is shown as value of the "Retail price with tax" field
+        assertValue(By.id("priceTI"), "12.20");
+
+        // Given the previous assertion passed
+        // Then the user clicks on the user icon in the top right corner of the
+        // page
+        click(By.id("employee_infos"));
+
+        // And clicks the "Sign out" link
+        click(By.linkText("Sign out"));
+
+    }
 
 }
