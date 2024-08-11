@@ -16,6 +16,85 @@
  */
 package io.github.bonigarcia.selenium.mantisbt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Duration;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 class MantisBTFeature11Test {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    @BeforeEach
+    void setup() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--disable-search-engine-choice-screen");
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+        // Log in as administrator
+        driver.get("http://localhost:3000/mantisbt/login_page.php");
+        driver.findElement(By.name("username")).sendKeys("administrator");
+        driver.findElement(By.name("password")).sendKeys("root");
+        driver.findElement(By.xpath("//input[@type='submit']")).click();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    public void testChangeIssueSeverity() {
+        // Given the user is on the home of the site and logged as administrator
+        // Already logged in and on the home page from setUp()
+
+        // When the user clicks the "View Issues" link
+        driver.findElement(By.linkText("View Issues")).click();
+
+        // And clicks the pencil icon in the row of the first issue
+        WebElement firstIssueEditIcon = driver
+                .findElements(By.xpath("//img[@alt='Edit']")).get(0);
+        firstIssueEditIcon.click();
+
+        // And selects "major" in the "Severity" dropdown select
+        Select severitySelect = new Select(wait.until(ExpectedConditions
+                .visibilityOfElementLocated(By.name("severity"))));
+        severitySelect.selectByVisibleText("major");
+
+        // And clicks the "Update Information" button
+        driver.findElement(By.xpath(
+                "//input[@type='submit' and @value='Update Information']"))
+                .click();
+
+        // Then "major" is shown to the right of "Severity"
+        WebElement severityText = wait
+                .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+                        "//td[contains(text(),'Severity')]/following-sibling::td")));
+        assertEquals("major", severityText.getText(),
+                "The expected severity is not displayed.");
+
+        // Given the previous assertion passed (handled by assertion above)
+
+        // Then the user clicks the "Logout" link
+        driver.findElement(By.linkText("Logout")).click();
+        assertTrue(driver.findElement(By.name("username")).isDisplayed(),
+                "Logout was not successful.");
+    }
 
 }
